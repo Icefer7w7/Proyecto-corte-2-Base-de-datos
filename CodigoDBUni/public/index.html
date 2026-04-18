@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Control de Notas – Universidad San Buenaventura</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --purple: #2d1e6e;
+      --purple-dark: #1a1040;
+      --orange: #f5a623;
+      --orange-light: #fdf0d0;
+      --white: #ffffff;
+      --gray-bg: #f4f4f4;
+      --input-bd: #cccccc;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Open Sans', sans-serif;
+      background: var(--gray-bg);
+      color: #222;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .topbar {
+      background: var(--orange);
+      padding: 8px 32px;
+      color: var(--white);
+      font-size: 12px;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    nav {
+      background: var(--white);
+      padding: 14px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,.08);
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .nav-logo-text {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--purple);
+      line-height: 1.4;
+      text-transform: uppercase;
+    }
+    .nav-links {
+      display: flex;
+      gap: 20px;
+      list-style: none;
+      align-items: center;
+    }
+    .nav-links a {
+      text-decoration: none;
+      color: var(--purple);
+      font-family: 'Montserrat', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      padding-bottom: 4px;
+      border-bottom: 2px solid transparent;
+      transition: color .2s, border-color .2s;
+    }
+    .nav-links a.active,
+    .nav-links a:hover { color: var(--orange); border-bottom-color: var(--orange); }
+    .hero {
+      background: linear-gradient(180deg, rgba(45,30,110,.92) 0%, rgba(45,30,110,.5) 100%),
+                  url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=1400&q=80') center/cover no-repeat;
+      color: var(--white);
+      text-align: center;
+      padding: 72px 20px 64px;
+    }
+    .hero small {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 13px;
+      color: var(--orange);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+    .hero h1 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: clamp(28px, 4vw, 48px);
+      margin-top: 16px;
+      line-height: 1.1;
+    }
+    .page { display: none; padding: 40px 32px 60px; }
+    .page.active { display: block; }
+    .auth-wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: grid;
+      gap: 26px;
+    }
+    .auth-card {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 28px;
+      background: var(--white);
+      border-radius: 12px;
+      box-shadow: 0 12px 40px rgba(0,0,0,.07);
+    }
+    .auth-panel {
+      border: 1px solid #e3e3e3;
+      border-radius: 10px;
+      padding: 28px;
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .auth-panel h2 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 18px;
+      color: var(--purple);
+      text-transform: uppercase;
+      letter-spacing: .8px;
+    }
+    .auth-panel label {
+      font-size: 12px;
+      font-weight: 700;
+      color: #444;
+    }
+    .auth-panel input {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1px solid var(--input-bd);
+      border-radius: 5px;
+      font-size: 14px;
+      outline: none;
+      transition: border-color .2s;
+    }
+    .auth-panel input:focus { border-color: var(--purple); }
+    .auth-panel button {
+      width: fit-content;
+      background: var(--purple);
+      color: var(--white);
+      border: none;
+      border-radius: 6px;
+      padding: 12px 24px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background .2s;
+      align-self: flex-start;
+    }
+    .auth-panel button:hover { background: var(--purple-dark); }
+    .form-feedback {
+      display: grid;
+      gap: 10px;
+      justify-content: center;
+      max-width: 1100px;
+      margin: 0 auto;
+      color: #c0392b;
+      font-size: 13px;
+      min-height: 22px;
+    }
+    .form-feedback span {
+      display: none;
+    }
+    .form-feedback span.active { display: block; }
+    .form-feedback span.success { color: #218838; }
+    .section-title {
+      font-family: 'Montserrat', sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-size: 12px;
+      color: var(--purple);
+      margin-bottom: 18px;
+    }
+    .notas-header {
+      max-width: 1100px;
+      margin: 0 auto 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 18px;
+    }
+    .notas-header .header-left {
+      display: grid;
+      gap: 6px;
+    }
+    .notas-header p { margin: 0; }
+    .notas-header .welcome-text {
+      color: #555;
+      font-size: 14px;
+    }
+    .btn-logout {
+      background: transparent;
+      border: 1px solid var(--purple);
+      color: var(--purple);
+      padding: 10px 18px;
+      border-radius: 6px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .btn-logout:hover { background: rgba(45,30,110,.08); }
+    .semester-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(120px, 1fr));
+      gap: 14px;
+      max-width: 1100px;
+      margin: 0 auto 24px;
+    }
+    .sem-btn {
+      border: 2px solid var(--purple);
+      background: var(--white);
+      color: var(--purple);
+      padding: 18px 10px;
+      border-radius: 10px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background .2s, color .2s, transform .2s;
+      display: grid;
+      gap: 6px;
+      text-align: center;
+    }
+    .sem-btn:hover { background: var(--purple); color: var(--white); transform: translateY(-1px); }
+    .sem-btn.active { background: var(--purple); color: var(--white); }
+    .sem-btn span { font-size: 11px; font-weight: 400; text-transform: uppercase; letter-spacing: .5px; }
+    .cortes-section {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: none;
+      gap: 16px;
+    }
+    .cortes-section.visible { display: block; }
+    .cortes-cards {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(120px, 1fr));
+      gap: 18px;
+    }
+    .corte-card {
+      background: var(--white);
+      border: 1px solid #e5e5e5;
+      border-radius: 10px;
+      padding: 24px 18px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,.05);
+    }
+    .corte-num {
+      font-family: 'Montserrat', sans-serif;
+      color: var(--purple);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .6px;
+      margin-bottom: 10px;
+    }
+    .corte-nota {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 36px;
+      font-weight: 800;
+    }
+    .no-notes {
+      padding: 18px 16px;
+      background: #fff5eb;
+      border: 1px solid #f5c399;
+      border-radius: 10px;
+      color: #a64b00;
+      margin-top: 20px;
+      max-width: 1100px;
+      margin-left: auto;
+      margin-right: auto;
+      display: none;
+    }
+    .calculator-wrap {
+      max-width: 1100px;
+      margin: 24px auto 0;
+      display: flex;
+      gap: 22px;
+      flex-wrap: wrap;
+      align-items: flex-start;
+    }
+    .calculator-box,
+    .promedio-box {
+      background: var(--white);
+      border-radius: 12px;
+      padding: 26px;
+      box-shadow: 0 14px 35px rgba(0,0,0,.06);
+    }
+    .calculator-box { flex: 1 1 420px; }
+    .calc-row {
+      display: grid;
+      grid-template-columns: 1fr 70px 70px auto;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .calc-row label { font-size: 13px; font-weight: 700; color: #555; }
+    .calc-input {
+      width: 100%;
+      padding: 11px 12px;
+      border: 1px solid var(--input-bd);
+      border-radius: 8px;
+      font-size: 14px;
+      outline: none;
+    }
+    .calc-input:focus { border-color: var(--purple); }
+    .pct-symbol { font-size: 14px; color: #777; }
+    .btn-calcular {
+      background: var(--purple);
+      color: var(--white);
+      border: none;
+      border-radius: 8px;
+      padding: 12px 28px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background .2s;
+      margin-top: 6px;
+    }
+    .btn-calcular:hover { background: var(--purple-dark); }
+    .calc-error { color: #c0392b; margin-top: 10px; display: none; }
+    .promedio-box {
+      width: min(360px, 100%);
+      display: grid;
+      gap: 18px;
+      text-align: center;
+    }
+    .promedio-box h3 {
+      font-family: 'Montserrat', sans-serif;
+      color: var(--purple);
+      font-size: 15px;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+    }
+    .promedio-valor {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 46px;
+      color: var(--purple);
+    }
+    footer {
+      background: var(--purple);
+      color: rgba(255,255,255,.88);
+      padding: 32px 32px 26px;
+      margin-top: auto;
+    }
+    .footer-top {
+      display: grid;
+      grid-template-columns: 1.7fr 1fr 1fr 1fr;
+      gap: 28px;
+      margin-bottom: 24px;
+    }
+    .footer-logo-text,
+    .footer-col h4 {
+      font-family: 'Montserrat', sans-serif;
+      color: var(--white);
+      margin-bottom: 10px;
+    }
+    .footer-col ul { list-style: none; padding: 0; }
+    .footer-col ul li { margin-bottom: 8px; }
+    .footer-col ul li a {
+      color: rgba(255,255,255,.75);
+      text-decoration: none;
+      font-size: 12px;
+    }
+    .footer-bottom { font-size: 11px; line-height: 1.8; color: rgba(255,255,255,.72); }
+    @media (max-width: 900px) {
+      .auth-card,
+      .calculator-wrap,
+      .footer-top { grid-template-columns: 1fr; }
+      nav { flex-direction: column; align-items: flex-start; }
+      .notas-header { flex-direction: column; align-items: stretch; }
+      .semester-grid { grid-template-columns: repeat(2, minmax(120px, 1fr)); }
+    }
+    @media (max-width: 620px) {
+      .nav-links { flex-direction: column; align-items: flex-start; gap: 12px; }
+      .semester-grid { grid-template-columns: 1fr; }
+      .calc-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <span>+57 (1) 6 44887 · ✉ informacion@usbbog.edu.co</span>
+    <span>Institución de educación superior de alta calidad</span>
+  </div>
+  <nav>
+    <div class="nav-logo-text">Universidad San Buenaventura Bogotá</div>
+    <ul class="nav-links">
+      <li><a href="#" class="active" data-page="inicio">Inicio</a></li>
+      <li><a href="#" data-page="notas">Tus notas</a></li>
+      <li><a href="https://www.usbbog.edu.co" target="_blank">Página oficial</a></li>
+      <li><a href="https://campus.usbco.edu.co/psp/USCS90PR/?cmd=login&languageCd=ESP&" target="_blank">Asis</a></li>
+    </ul>
+  </nav>
+  <div class="hero">
+    <small>Universidad San Buenaventura</small>
+    <h1 id="hero-title">Control de Notas</h1>
+  </div>
+  <div class="page active" id="page-inicio">
+    <div class="auth-wrap">
+      <p class="section-title">Accede con tu cuenta o crea un usuario nuevo</p>
+      <div class="auth-card">
+        <div class="auth-panel">
+          <h2>Inicia tu sesión aquí</h2>
+          <div>
+            <label for="login-email">Correo</label>
+            <input id="login-email" type="email" placeholder="usuario@correo.com" autocomplete="username" />
+          </div>
+          <div>
+            <label for="login-password">Contraseña</label>
+            <input id="login-password" type="password" placeholder="Contraseña" autocomplete="current-password" />
+          </div>
+          <button id="btn-login">Iniciar sesión</button>
+        </div>
+        <div class="auth-panel">
+          <h2>Crea tu usuario</h2>
+          <div>
+            <label for="register-email">Correo</label>
+            <input id="register-email" type="email" placeholder="usuario@correo.com" autocomplete="username" />
+          </div>
+          <div>
+            <label for="register-password">Contraseña</label>
+            <input id="register-password" type="password" placeholder="Contraseña" autocomplete="new-password" />
+          </div>
+          <button id="btn-register">Crear cuenta</button>
+        </div>
+      </div>
+      <div class="form-feedback">
+        <span id="login-error"></span>
+        <span id="register-error"></span>
+        <span id="register-success" class="success"></span>
+      </div>
+    </div>
+  </div>
+  <div class="page" id="page-notas">
+    <div class="notas-header">
+      <div class="header-left">
+        <p class="section-title">Tus notas</p>
+        <p class="welcome-text" id="welcome-text">Aquí verás las notas del semestre 1.</p>
+      </div>
+      <button class="btn-logout" id="btn-logout">Cerrar sesión</button>
+    </div>
+    <div class="semester-grid" id="semester-grid"></div>
+    <div class="cortes-section" id="cortes-section">
+      <div class="cortes-cards" id="cortes-cards"></div>
+      <div class="no-notes" id="no-notes">Selecciona el semestre 1 para ver tus notas. Las notas solo están disponibles en el semestre 1.</div>
+    </div>
+    <div class="section-title">Calculadora de promedio</div>
+    <div class="calculator-wrap">
+      <div class="calculator-box">
+        <div class="calc-row">
+          <label for="nota1">Corte 1</label>
+          <input class="calc-input" id="nota1" type="number" placeholder="0.0" min="0" max="5" step="0.1" />
+          <input class="calc-input" id="pct1" type="number" placeholder="%" min="0" max="100" />
+          <span class="pct-symbol">%</span>
+        </div>
+        <div class="calc-row">
+          <label for="nota2">Corte 2</label>
+          <input class="calc-input" id="nota2" type="number" placeholder="0.0" min="0" max="5" step="0.1" />
+          <input class="calc-input" id="pct2" type="number" placeholder="%" min="0" max="100" />
+          <span class="pct-symbol">%</span>
+        </div>
+        <div class="calc-row">
+          <label for="nota3">Corte 3</label>
+          <input class="calc-input" id="nota3" type="number" placeholder="0.0" min="0" max="5" step="0.1" />
+          <input class="calc-input" id="pct3" type="number" placeholder="%" min="0" max="100" />
+          <span class="pct-symbol">%</span>
+        </div>
+        <div id="calc-error" class="calc-error"></div>
+        <button id="btn-calcular" class="btn-calcular">Calcular promedio</button>
+      </div>
+      <div class="promedio-box">
+        <h3>Tu promedio de notas es</h3>
+        <div class="promedio-valor" id="promedio-valor">0.00</div>
+      </div>
+    </div>
+  </div>
+  <footer>
+    <div class="footer-top">
+      <div>
+        <div class="footer-logo-text">USB Bogotá</div>
+        <p>Correo: informacion@usbbog.edu.co<br>Teléfono: 667 1090</p>
+      </div>
+      <div>
+        <p class="footer-logo-text">Menú Principal</p>
+        <ul><li><a href="#">Universidad</a></li><li><a href="#">Admisiones</a></li><li><a href="#">Programas</a></li></ul>
+      </div>
+      <div>
+        <p class="footer-logo-text">Documentos</p>
+        <ul><li><a href="#">Reglamento</a></li><li><a href="#">Valores matrícula</a></li><li><a href="#">Políticas</a></li></ul>
+      </div>
+      <div>
+        <p class="footer-logo-text">Facultades</p>
+        <ul><li><a href="#">Ingeniería</a></li><li><a href="#">Psicología</a></li><li><a href="#">Derecho</a></li></ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>Copyright © 2026 Universidad de San Buenaventura, Sede Bogotá.</p>
+    </div>
+  </footer>
+  <script src="js/main.js"></script>
+</body>
+</html>
