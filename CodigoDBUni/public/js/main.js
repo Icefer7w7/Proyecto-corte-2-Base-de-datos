@@ -9,6 +9,7 @@ function init() {
   initNavigation();
   initAuth();
   initCalculadora();
+  initFirebaseForm();
   buildSemesterGrid();
   const student = getLoggedStudent();
   if (student) {
@@ -57,41 +58,6 @@ function initAuth() {
     showPage('inicio');
     showFormMessage('login-error', 'Has cerrado sesión.');
   });
-}
-
-async function doLogin() {
-  hideFormMessages();
-  const email = document.getElementById('login-email').value.trim();
-  const password = document.getElementById('login-password').value.trim();
-
-  if (!email || !password) {
-    showFormMessage('login-error', 'Completa el correo y la contraseña.');
-    return;
-  }
-
-  try {
-    const response = await fetch(`${API}/student`);
-    if (!response.ok) {
-      showFormMessage('login-error', 'No se pudo conectar al servidor.');
-      return;
-    }
-
-    const students = await response.json();
-    const match = Array.isArray(students)
-      ? students.find(user => user.email === email && user.password === password)
-      : null;
-
-    if (!match) {
-      showFormMessage('login-error', 'Usuario o contraseña incorrectos.');
-      return;
-    }
-
-    saveLoggedStudent({ id: match.id, email: match.email });
-    showNotasPage();
-    loadNotas();
-  } catch (error) {
-    showFormMessage('login-error', 'Error de conexión con el servidor.');
-  }
 }
 
 async function doRegister() {
@@ -206,6 +172,83 @@ function initCalculadora() {
   btn.addEventListener('click', calcularPromedio);
 }
 
+function initFirebaseForm() {
+  const btnFirebaseSend = document.getElementById('btn-firebase-send');
+  const btnMysqlSync = document.getElementById('btn-mysql-sync');
+
+  if (btnFirebaseSend) btnFirebaseSend.addEventListener('click', sendToFirebase);
+  if (btnMysqlSync) btnMysqlSync.addEventListener('click', syncFirebaseToMysql);
+}
+
+function getFirebaseFormFields() {
+  return {
+    email: document.getElementById('firebase-email').value.trim(),
+    password: document.getElementById('firebase-password').value.trim(),
+  };
+}
+
+function showFirebaseMessage(message, success = true) {
+  const status = document.getElementById('firebase-status');
+  if (!status) return;
+  status.textContent = message;
+  status.style.color = success ? '#218838' : '#c0392b';
+}
+
+function hideFirebaseMessages() {
+  const status = document.getElementById('firebase-status');
+  if (!status) return;
+  status.textContent = '';
+}
+
+async function sendToFirebase() {
+  hideFirebaseMessages();
+  const { email, password } = getFirebaseFormFields();
+
+  if (!email || !password) {
+    showFirebaseMessage('Completa el correo y la contraseña para Firebase.', false);
+    return;
+  }
+
+  try {
+    const response = await fetch(`${API}/firebase/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      showFirebaseMessage(data.error || 'No se pudo enviar a Firebase.', false);
+      return;
+    }
+
+    showFirebaseMessage('Contacto enviado a Firebase correctamente. Ahora registra en MySQL.', true);
+  } catch (error) {
+    showFirebaseMessage('Error de conexión con Firebase.', false);
+  }
+}
+
+async function syncFirebaseToMysql() {
+  hideFirebaseMessages();
+
+  try {
+    const response = await fetch(`${API}/firebase/sync`, {
+      method: 'POST',
+    });
+    const data = await response.json();
+
+    if (!response.ok) {
+      showFirebaseMessage(data.error || 'No se pudo sincronizar con MySQL.', false);
+      return;
+    }
+
+    showFirebaseMessage(`Sincronización completa. ${data.synced} de ${data.total} contactos registrados en MySQL.`, true);
+  } catch (error) {
+    showFirebaseMessage('Error de conexión al sincronizar con MySQL.', false);
+  }
+}
+
 function calcularPromedio() {
   const nota1 = parseFloat(document.getElementById('nota1').value);
   const nota2 = parseFloat(document.getElementById('nota2').value);
@@ -282,4 +325,36 @@ function hideFormMessages() {
     el.textContent = '';
     el.classList.remove('active');
   });
+}
+
+async function doLogin() {
+  hideFormMessages();
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value.trim();
+
+  if (!email || !password) {
+    showFormMessage('login-error', 'Completa el correo y la contraseña.');
+    return;
+  }
+
+  try {
+  
+    const response = await fetch(`${API}/student/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+
+    if (!response.ok) {
+      showFormMessage('login-error', 'Usuario o contraseña incorrectos.');
+      return;
+    }
+
+    const data = await response.json();
+    saveLoggedStudent({ id: data.id, email: data.email });
+    showNotasPage();
+    loadNotas();
+  } catch (error) {
+    showFormMessage('login-error', 'Error de conexión con el servidor.');
+  }
 }

@@ -343,6 +343,53 @@
       font-size: 46px;
       color: var(--purple);
     }
+    .firebase-wrap {
+      max-width: 1100px;
+      margin: 32px auto 0;
+      padding: 28px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 12px 32px rgba(0,0,0,.08);
+      display: grid;
+      gap: 18px;
+    }
+    .firebase-wrap h2 {
+      font-family: 'Montserrat', sans-serif;
+      color: var(--purple);
+      font-size: 16px;
+      text-transform: uppercase;
+      letter-spacing: .8px;
+    }
+    .firebase-form {
+      display: grid;
+      gap: 14px;
+    }
+    .firebase-form .form-group {
+      display: grid;
+      gap: 8px;
+    }
+    .firebase-form input {
+      width: 100%;
+      padding: 11px 12px;
+      border: 1px solid var(--input-bd);
+      border-radius: 8px;
+      font-size: 14px;
+      outline: none;
+    }
+    .firebase-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+    .firebase-feedback {
+      color: #2d1e6e;
+      min-height: 22px;
+      font-size: 14px;
+    }
+    .firebase-feedback span {
+      display: block;
+    }
     footer {
       background: var(--purple);
       color: rgba(255,255,255,.88);
@@ -478,6 +525,27 @@
       <div class="promedio-box">
         <h3>Tu promedio de notas es</h3>
         <div class="promedio-valor" id="promedio-valor">0.00</div>
+      </div>
+
+      <div class="firebase-wrap">
+        <h2>Registro de contacto de emergencia</h2>
+        <div class="firebase-form">
+          <div class="form-group">
+            <label for="firebase-email">Correo</label>
+            <input id="firebase-email" type="email" placeholder="correo@ejemplo.com" autocomplete="email" />
+          </div>
+          <div class="form-group">
+            <label for="firebase-password">Contraseña</label>
+            <input id="firebase-password" type="password" placeholder="Contraseña" autocomplete="new-password" />
+          </div>
+          <div class="firebase-actions">
+            <button id="btn-firebase-send" class="btn-calcular" type="button">Enviar a Firebase</button>
+            <button id="btn-mysql-sync" class="btn-calcular" type="button">Registrar en MySQL</button>
+          </div>
+          <div class="form-feedback firebase-feedback">
+            <span id="firebase-status"></span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
